@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Shopping List</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+
+  <body>
+    <header class="header">
+      <div class="wrap">
+        <h1>Shopping List</h1>
+        <p class="sub">Pick from essentials, add custom items, download as .txt</p>
+      </div>
+    </header>
+
+    <main class="wrap grid">
+      <!-- Essentials -->
+      <section class="card">
+        <div class="card-head">
+          <h2>Home Essentials</h2>
+          <div class="tools">
+            <input
+              id="essentialSearch"
+              class="input"
+              type="search"
+              placeholder="Search essentials…"
+              aria-label="Search essentials"
+            />
+            <button id="resetEssentialsBtn" class="btn btn-ghost" type="button">
+              Reset
+            </button>
+          </div>
+        </div>
+
+        <div id="essentialsContainer" class="essentials"></div>
+      </section>
+
+      <!-- Effective List -->
+      <section class="card">
+        <div class="card-head">
+          <h2>Effective List</h2>
+          <div class="tools">
+            <button id="downloadBtn" class="btn" type="button">Download .txt</button>
+            <button id="clearBtn" class="btn btn-danger" type="button">Clear</button>
+          </div>
+        </div>
+
+        <form id="addForm" class="add-form" autocomplete="off">
+          <input
+            id="addInput"
+            class="input"
+            type="text"
+            placeholder="Add an item (e.g., coffee)"
+            aria-label="Add an item"
+            maxlength="60"
+          />
+          <button class="btn" type="submit">Add</button>
+        </form>
+
+        <div class="meta">
+          <span id="countLabel" class="pill">0 items</span>
+          <span class="hint">Tip: click an essential checkbox to add/remove it.</span>
+        </div>
+
+        <ul id="effectiveList" class="list" aria-label="Effective shopping list"></ul>
+
+        <p id="emptyState" class="empty" hidden>
+          Your effective list is empty. Add items from essentials or type your own.
+        </p>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="wrap">
+        <small>Client-side app • Data stored locally in your browser</small>
+      </div>
+    </footer>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
