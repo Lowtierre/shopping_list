@@ -38,10 +38,6 @@ body {
 }
 
 .header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
   padding: 24px 0 18px;
   border-bottom: 1px solid var(--border);
   background: rgba(18, 22, 32, 0.35);
@@ -63,7 +59,7 @@ h1 {
   display: grid;
   grid-template-columns: 1fr;
   gap: var(--gap);
-  padding: 128px 0 26px;
+  padding: 24px 0 26px;
 }
 
 @media (min-width: 920px) {
