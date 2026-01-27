@@ -9,72 +9,131 @@ const STORAGE_KEY = "shopping_list_v1";
 
 const ESSENTIALS = [
   {
-    group: "Pulizia",
-    items: [
-      "Detersivo per piatti",
-      "Spugna",
-      "Sacchetti per la spazzatura",
-      "Carta assorbente",
-      "Detergente multiuso",
-      "Detergente per vetri",
-      "Detersivo per lavatrice",
-      "Ammorbidente",
-      "Candeggina",
-      "Detergente per WC",
-      "Detergente per pavimenti",
-    ],
-  },
-  {
     group: "Alimentari di base",
     items: [
+      // Cereali e pasta
       "Pasta",
+      "Tortellini",
+      "Quadrucci",
       "Riso",
-      "Pomodori pelati",
+
+      // Legumi e conserve
+      "Lenticchie",
+      "Ceci",
       "Fagioli",
       "Tonno",
+      "Passata",
+
+      // Verdure/odori (dispensa o uso cucina)
+      "Cipolle",
+      "Aglio",
+      "Porro",
+      "Carote",
+      "Zucchine",
+      "Pomodorini",
+      "Odori misti",
+
+      // Uova e latticini
       "Uova",
       "Latte",
       "Burro",
-      "Formaggio",
+      "Philadelphia",
+      "Edamer",
+      "Grana",
+      "Sottiletta",
+
+      // Pane
       "Pane",
-      "Olio extravergine di oliva",
-      "Caffè",
-      "Tè",
-      "Zucchero",
+
+      // Condimenti e basi
+      "Olio",
+      "Olio per frittura",
       "Sale",
       "Pepe",
+
+      // Salse
+      "Maionese",
+      "Ketchup",
+
+      // Colazione e bevande calde
+      "Caffè",
+      "Tè",
+
+      // Dolcificanti
+      "Zucchero",
+
+      // Preparazioni/pronti
+      "Lesso",
     ],
   },
   {
     group: "Freschi",
     items: [
-      "Frutta",
+      // Frutta
+      "Mele",
+      "Banane",
+      "Mandarini",
+      "Arancie",
+
+      // Verdura
       "Verdura",
+
+      // Latticini freschi
       "Yogurt",
+
+      // Carne
       "Pollo",
-      "Pesce",
-    ],
-  },
-  {
-    group: "Bagno",
-    items: [
-      "Carta igienica",
-      "Sapone per le mani",
-      "Shampoo",
-      "Dentifricio",
-      "Deodorante",
+      "Carpaccio",
+      "Salsiccia",
+      "Hamburger",
+
+      // Pesce
+      "Salmone",
+      "Nasello",
+      "Bastoncini",
+      "Crocchette"
+
+      // Altro
+      "Sofficini"
     ],
   },
   {
     group: "Casa",
     items: [
-      "Pile",
-      "Lampadine",
+      // Carta e usa-e-getta
+      "Carta igienica",
+      "Scottex",
       "Carta alluminio",
       "Carta da forno",
+      "Sacchetti per la spazzatura",
+
+      // Igiene personale
+      "Sapone per le mani",
+      "Shampoo",
+      "Dentifricio",
+      "Deodorante",
+
+      // Piatti
+      "Detersivo per piatti",
+      "Spugna",
+
+      // Pulizia casa (superfici)
+      "Sgrassatore",
+      "Anticalcare",
+      "Detergente per vetri",
+
+      // Bucato
+      "Detersivo per lavatrice",
+      "Ammorbidente",
+      "Candeggina",
+
+      // Bagno e pavimenti
+      "Detergente per WC",
+      "Detergente per pavimenti",
     ],
   },
 ];
+
 
 // --- State ---
 function loadState() {
