@@ -91,7 +91,7 @@ const ESSENTIALS = [
       "Salmone",
       "Nasello",
       "Bastoncini",
-      "Crocchette"
+      "Crocchette",
 
       // Altro
       "Sofficini"
