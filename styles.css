@@ -32,7 +32,6 @@ body {
 }
 
 .wrap {
-  padding-top: 200px;
   width: min(1100px, calc(100% - 32px));
   margin: 0 auto;
 }
@@ -63,7 +62,7 @@ h1 {
   display: grid;
   grid-template-columns: 1fr;
   gap: var(--gap);
-  padding: 18px 0 26px;
+  padding: 64px 0 26px;
 }
 
 @media (min-width: 920px) {
