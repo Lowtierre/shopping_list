@@ -62,7 +62,7 @@ h1 {
   display: grid;
   grid-template-columns: 1fr;
   gap: var(--gap);
-  padding: 64px 0 26px;
+  padding: 128px 0 26px;
 }
 
 @media (min-width: 920px) {
