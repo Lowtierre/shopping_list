@@ -28,6 +28,7 @@ body {
   background: radial-gradient(1000px 600px at 20% 10%, rgba(122, 162, 255, 0.18), transparent 60%),
     radial-gradient(900px 500px at 90% 20%, rgba(255, 92, 122, 0.12), transparent 60%),
     var(--bg);
+  background-attachment: fixed;
   color: var(--text);
 }
 
