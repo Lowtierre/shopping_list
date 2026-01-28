@@ -280,7 +280,7 @@ function renderEssentials(filterText = "") {
 
     headerBtn.addEventListener("click", () => {
       isOpen = !isOpen;
-      itemsEl.hidden = !isOpen;
+      itemsEl.classList.toggle("is-collapsed", !isOpen);
       headerBtn.setAttribute("aria-expanded", String(isOpen));
       groupEl.classList.toggle("is-collapsed", !isOpen);
     });
