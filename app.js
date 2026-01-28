@@ -435,11 +435,6 @@ function init() {
   renderEssentials("");
   $("#essentialSearch").addEventListener("input", (e) => renderEssentials(e.target.value));
 
-  $("#resetEssentialsBtn").addEventListener("click", () => {
-    $("#essentialSearch").value = "";
-    renderEssentials("");
-  });
-
   // Effective
   renderEffective();
 
