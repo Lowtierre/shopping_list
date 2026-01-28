@@ -38,6 +38,7 @@ body {
 }
 
 .header {
+  width: 100%;
   padding: 24px 0 18px;
   border-bottom: 1px solid var(--border);
   background: rgba(18, 22, 32, 0.35);
