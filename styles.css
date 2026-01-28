@@ -165,6 +165,36 @@ h1 {
 
 .group-title strong { font-size: 14px; }
 
+.group-toggle {
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  border: none;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.group-title-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.group-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.chevron {
+  opacity: 0.85;
+  transition: transform 0.15s ease;
+}
+
+.group.is-collapsed .chevron {
+  transform: rotate(-90deg);
+}
+
 .group-items {
   display: grid;
   grid-template-columns: 1fr;
