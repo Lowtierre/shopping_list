@@ -83,6 +83,7 @@ h1 {
   justify-content: space-between;
   gap: 12px;
   margin-bottom: 12px;
+  flex-wrap: wrap;
 }
 
 .card-head h2 {
@@ -95,6 +96,7 @@ h1 {
   gap: 10px;
   align-items: center;
   justify-content: flex-end;
+  flex-wrap: wrap;
 }
 
 .input {
@@ -236,6 +238,7 @@ label.item input[type="checkbox"] {
   display: flex;
   gap: 10px;
   margin-top: 6px;
+  flex-wrap: wrap;
 }
 
 .add-form .input { flex: 1; min-width: 0; }
