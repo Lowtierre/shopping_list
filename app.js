@@ -38,6 +38,9 @@ const ESSENTIALS = [
       "Latte",
       "Burro",
       "Philadelphia",
+      "Mozzarella",
+      "Prosciutto Cotto",
+      "Prosciutto Crudo",
       "Edamer",
       "Grana",
       "Sottiletta",
@@ -86,6 +89,7 @@ const ESSENTIALS = [
       "Carpaccio",
       "Salsiccia",
       "Hamburger",
+      "Macinato",
 
       // Pesce
       "Salmone",
