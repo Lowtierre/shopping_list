@@ -356,7 +356,7 @@ function renderEffective() {
     const tag = document.createElement("span");
     tag.className = "tag";
     if (it.source === "essential") {
-      tag.textContent = it.group ? `s${it.group}` : "Essential";
+      tag.textContent = it.group ? `${it.group}` : "Essential";
     } else {
       tag.textContent = "Custom";
     }
