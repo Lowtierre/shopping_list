@@ -36,7 +36,7 @@ body {
 }
 
 .wrap {
-  width: min(1100px, calc(100% - 32px));
+  width: min(1100px, calc(100% - 44px));
   margin: 0 auto;
 }
 
