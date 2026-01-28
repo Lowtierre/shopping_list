@@ -293,6 +293,8 @@ label.item input[type="checkbox"] {
   align-items: center;
   gap: 10px;
   min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .tag {
