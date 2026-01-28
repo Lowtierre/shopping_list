@@ -245,15 +245,41 @@ function renderEssentials(filterText = "") {
 
     if (!matchesGroup) return;
 
-    const groupEl = document.createElement("div");
+        const groupEl = document.createElement("div");
     groupEl.className = "group";
 
-    const title = document.createElement("div");
-    title.className = "group-title";
-    title.innerHTML = `<strong>${groupObj.group}</strong><span class="pill">${groupObj.items.length} items</span>`;
+    const headerBtn = document.createElement("button");
+    headerBtn.type = "button";
+    headerBtn.className = "group-title group-toggle";
+    headerBtn.setAttribute("aria-expanded", "true");
+
+    const left = document.createElement("div");
+    left.className = "group-title-left";
+    left.innerHTML = `<strong>${groupObj.group}</strong><span class="pill">${groupObj.items.length} items</span>`;
+
+    const chevron = document.createElement("span");
+    chevron.className = "chevron";
+    chevron.textContent = "▾";
+
+    headerBtn.appendChild(left);
+    headerBtn.appendChild(chevron);
 
     const itemsEl = document.createElement("div");
     itemsEl.className = "group-items";
+    // id unico per accessibilità
+    const panelId = `panel-${groupObj.group}`.replace(/[^a-z0-9_-]/gi, "_");
+    itemsEl.id = panelId;
+    headerBtn.setAttribute("aria-controls", panelId);
+
+    // Stato iniziale: aperto (puoi cambiarlo a false se vuoi chiuso di default)
+    let isOpen = true;
+
+    headerBtn.addEventListener("click", () => {
+      isOpen = !isOpen;
+      itemsEl.hidden = !isOpen;
+      headerBtn.setAttribute("aria-expanded", String(isOpen));
+      groupEl.classList.toggle("is-collapsed", !isOpen);
+    });
 
     groupObj.items.forEach((name) => {
       if (q && !name.toLowerCase().includes(q) && !groupObj.group.toLowerCase().includes(q)) return;
@@ -290,7 +316,7 @@ function renderEssentials(filterText = "") {
       itemsEl.appendChild(label);
     });
 
-    groupEl.appendChild(title);
+    groupEl.appendChild(headerBtn);
     groupEl.appendChild(itemsEl);
     container.appendChild(groupEl);
   });
