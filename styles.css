@@ -202,6 +202,10 @@ h1 {
   padding: 10px 12px;
 }
 
+.group-items.is-collapsed {
+  display: none;
+}
+
 @media (min-width: 540px) {
   .group-items { grid-template-columns: 1fr 1fr; }
 }
