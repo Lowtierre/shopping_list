@@ -81,6 +81,14 @@ const ESSENTIALS = [
     ],
   },
   {
+    group: "Bibite",
+    items: [
+       "Birra",
+       "Succhi",
+       "Vino"
+    ]
+  },
+  {
     group: "Freschi",
     items: [
       // Latticini freschi
@@ -100,7 +108,9 @@ const ESSENTIALS = [
       "Crocchette",
 
       // Altro
-      "Sofficini"
+      "Sofficini",
+      "Pizza",
+      "Piselli"
     ],
   },
   {
@@ -116,6 +126,7 @@ const ESSENTIALS = [
       // Igiene personale
       "Sapone per le mani",
       "Shampoo",
+      "Balsamo",
       "Dentifricio",
       "Deodorante",
 
