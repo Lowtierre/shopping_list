@@ -16,6 +16,7 @@ const ESSENTIALS = [
       "Tortellini",
       "Quadrucci",
       "Riso",
+      "Ravioli",
 
       // Legumi e conserve
       "Lenticchie",
@@ -24,7 +25,7 @@ const ESSENTIALS = [
       "Tonno",
       "Passata",
 
-      // Verdure/odori (dispensa o uso cucina)
+      // Verdure/odori
       "Cipolle",
       "Aglio",
       "Porro",
@@ -32,6 +33,15 @@ const ESSENTIALS = [
       "Zucchine",
       "Pomodorini",
       "Odori misti",
+      "Valeriana",
+      "Sedano",
+      "Cavolo",
+
+      // Frutta
+      "Mele",
+      "Banane",
+      "Mandarini",
+      "Arancie",
 
       // Uova e latticini
       "Uova",
@@ -47,6 +57,7 @@ const ESSENTIALS = [
 
       // Pane
       "Pane",
+      "Schiacciata",
 
       // Condimenti e basi
       "Olio",
@@ -72,15 +83,6 @@ const ESSENTIALS = [
   {
     group: "Freschi",
     items: [
-      // Frutta
-      "Mele",
-      "Banane",
-      "Mandarini",
-      "Arancie",
-
-      // Verdura
-      "Verdura",
-
       // Latticini freschi
       "Yogurt",
 
