@@ -1,5 +1,5 @@
 import { BucketGroup } from "./BucketGroup";
-import { card, errorText, input, primaryButton } from "./uiClasses";
+import { card, errorText, ghostButton, input, primaryButton } from "./uiClasses";
 
 export function BucketsPanel({
   bucketError,
@@ -9,11 +9,19 @@ export function BucketsPanel({
   canPersistBuckets,
   collapsedGroups,
   essentialSearch,
+  isEditMode,
   isInEffective,
   onAddBucket,
+  onAddBucketItem,
+  onCancelEdit,
   onChangeBucketName,
   onChangeSearch,
   onDeleteBucket,
+  onRemoveBucketItem,
+  onRenameBucket,
+  onRenameBucketItem,
+  onSaveEdit,
+  onStartEdit,
   onToggleGroup,
   onToggleItem,
 }) {
@@ -24,7 +32,11 @@ export function BucketsPanel({
           <h2 className="m-0 mt-0.5 text-lg font-bold">Home Essentials</h2>
           {!canPersistBuckets ? (
             <p className="m-0 mt-1 text-xs text-[#b7c0d8]/90">
-              Le modifiche ai bucket sono disponibili solo in locale finche non fai login.
+              Accedi per modificare i tuoi bucket privati.
+            </p>
+          ) : isEditMode ? (
+            <p className="m-0 mt-1 text-xs text-[#b7c0d8]/90">
+              Modalita modifica attiva: la lista della spesa resta ferma finche salvi o annulli.
             </p>
           ) : null}
         </div>
@@ -37,22 +49,39 @@ export function BucketsPanel({
             value={essentialSearch}
             onChange={(event) => onChangeSearch(event.target.value)}
           />
+          {canPersistBuckets && !isEditMode ? (
+            <button className={primaryButton} type="button" onClick={onStartEdit}>
+              Modifica
+            </button>
+          ) : null}
+          {canPersistBuckets && isEditMode ? (
+            <>
+              <button className={primaryButton} type="button" onClick={onSaveEdit} disabled={bucketLoading}>
+                Salva
+              </button>
+              <button className={ghostButton} type="button" onClick={onCancelEdit} disabled={bucketLoading}>
+                Annulla
+              </button>
+            </>
+          ) : null}
         </div>
       </div>
 
-      <form className="mb-3 flex flex-wrap gap-2.5" onSubmit={onAddBucket}>
-        <input
-          className={`${input} min-w-[180px] flex-1`}
-          type="text"
-          placeholder="New bucket name"
-          value={bucketName}
-          onChange={(event) => onChangeBucketName(event.target.value)}
-          maxLength={60}
-        />
-        <button className={primaryButton} type="submit" disabled={bucketLoading}>
-          Add bucket
-        </button>
-      </form>
+      {canPersistBuckets && isEditMode ? (
+        <form className="mb-3 flex flex-wrap gap-2.5" onSubmit={onAddBucket}>
+          <input
+            className={`${input} min-w-[180px] flex-1`}
+            type="text"
+            placeholder="Nome nuovo bucket"
+            value={bucketName}
+            onChange={(event) => onChangeBucketName(event.target.value)}
+            maxLength={60}
+          />
+          <button className={primaryButton} type="submit" disabled={bucketLoading}>
+            Aggiungi bucket
+          </button>
+        </form>
+      ) : null}
 
       {bucketError ? <p className={errorText}>{bucketError}</p> : null}
 
@@ -62,9 +91,14 @@ export function BucketsPanel({
             bucket={bucket}
             bucketLoading={bucketLoading}
             isCollapsed={Boolean(collapsedGroups[bucket.id])}
+            isEditMode={isEditMode}
             isInEffective={isInEffective}
             key={bucket.id}
+            onAddBucketItem={onAddBucketItem}
             onDeleteBucket={onDeleteBucket}
+            onRemoveBucketItem={onRemoveBucketItem}
+            onRenameBucket={onRenameBucket}
+            onRenameBucketItem={onRenameBucketItem}
             onToggleGroup={onToggleGroup}
             onToggleItem={onToggleItem}
           />

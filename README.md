@@ -30,10 +30,10 @@ Create a local `.env` file and set the same variables in Vercel:
 
 ```bash
 VITE_SUPABASE_URL=https://your-project.supabase.co
-VITE_SUPABASE_ANON_KEY=your-public-anon-key
+VITE_SUPABASE_PUBLISHABLE_KEY=your-public-publishable-key
 ```
 
-Only use the public anon key in `VITE_*` variables. Never expose the Supabase service role key in this React app.
+Only use the public publishable key in `VITE_*` variables. Never expose the Supabase service role key in this React app.
 
 ## Supabase setup
 Create the bucket table in the Supabase SQL editor:

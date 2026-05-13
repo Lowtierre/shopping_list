@@ -15,12 +15,12 @@ import {
   login,
   logout,
   signUp,
+  updateBucket,
 } from "./api";
 import { DEFAULT_BUCKETS, STORAGE_KEY } from "./constants";
 import {
   buildShoppingListText,
   createId,
-  createLocalBucket,
   loadStoredState,
   normalizeName,
   sameName,
@@ -34,6 +34,8 @@ export default function App() {
   const [essentialSearch, setEssentialSearch] = useState("");
   const [customItem, setCustomItem] = useState("");
   const [bucketName, setBucketName] = useState("");
+  const [draftBuckets, setDraftBuckets] = useState(null);
+  const [isEditMode, setIsEditMode] = useState(false);
   const [credentials, setCredentials] = useState({ email: "", password: "" });
   const [collapsedGroups, setCollapsedGroups] = useState({});
   const [authLoading, setAuthLoading] = useState(false);
@@ -43,6 +45,7 @@ export default function App() {
 
   const isAuthenticated = authMode === "authenticated" && session?.user;
   const canPersistBuckets = Boolean(isAuthenticated && isSupabaseConfigured);
+  const activeBuckets = isEditMode && draftBuckets ? draftBuckets : state.buckets;
 
   useEffect(() => {
     async function bootstrapAuth() {
@@ -92,14 +95,14 @@ export default function App() {
 
   const filteredBuckets = useMemo(() => {
     const query = normalizeName(essentialSearch).toLowerCase();
-    if (!query) return state.buckets;
+    if (!query) return activeBuckets;
 
-    return state.buckets.filter(
+    return activeBuckets.filter(
       (bucket) =>
         bucket.group.toLowerCase().includes(query) ||
         bucket.items.some((item) => item.toLowerCase().includes(query))
     );
-  }, [essentialSearch, state.buckets]);
+  }, [activeBuckets, essentialSearch]);
 
   function isInEffective(name) {
     return state.effective.some((item) => sameName(item.name, name));
@@ -142,6 +145,8 @@ export default function App() {
   }
 
   function onEssentialToggle(itemName, itemGroup, checked) {
+    if (isEditMode) return;
+
     if (checked) {
       addToEffective({ name: itemName, source: "essential", group: itemGroup });
       return;
@@ -204,51 +209,216 @@ export default function App() {
     } finally {
       setSession(null);
       setAuthMode("prompt");
+      setDraftBuckets(null);
+      setIsEditMode(false);
       persist({ ...state, buckets: DEFAULT_BUCKETS });
     }
   }
 
   async function handleAddBucket(event) {
     event.preventDefault();
+    if (!canPersistBuckets || !isEditMode) return;
+
     const normalized = normalizeName(bucketName);
     if (!normalized) return;
 
     setBucketError("");
-    setBucketLoading(true);
-
-    try {
-      const nextBucket = canPersistBuckets
-        ? await createBucket({ name: normalized, items: [] }, session.user.id)
-        : createLocalBucket(normalized);
-
-      persist({ ...state, buckets: [...state.buckets, nextBucket] });
-      setBucketName("");
-    } catch (error) {
-      setBucketError(error.message || "Cannot create bucket");
-    } finally {
-      setBucketLoading(false);
-    }
+    setDraftBuckets((current) => [
+      ...(current || []),
+      {
+        id: `draft-${createId()}`,
+        group: normalized,
+        items: [],
+      },
+    ]);
+    setBucketName("");
   }
 
-  async function handleDeleteBucket(bucket) {
-    const confirmed = window.confirm(`Delete bucket "${bucket.group}"?`);
+  function handleStartEdit() {
+    if (!canPersistBuckets) return;
+
+    setBucketError("");
+    setBucketName("");
+    setDraftBuckets(state.buckets.map((bucket) => ({ ...bucket, items: [...bucket.items] })));
+    setIsEditMode(true);
+  }
+
+  function handleCancelEdit() {
+    setBucketError("");
+    setBucketName("");
+    setDraftBuckets(null);
+    setIsEditMode(false);
+  }
+
+  function renameDraftBucket(bucketId, nextName) {
+    setDraftBuckets((current) =>
+      (current || []).map((bucket) => (bucket.id === bucketId ? { ...bucket, group: nextName } : bucket))
+    );
+  }
+
+  function addDraftBucketItem(bucketId, name) {
+    const normalized = normalizeName(name);
+    if (!normalized) return;
+
+    setDraftBuckets((current) =>
+      (current || []).map((bucket) => {
+        if (bucket.id !== bucketId || bucket.items.some((item) => sameName(item, normalized))) {
+          return bucket;
+        }
+
+        return { ...bucket, items: [...bucket.items, normalized] };
+      })
+    );
+  }
+
+  function renameDraftBucketItem(bucketId, index, nextName) {
+    setDraftBuckets((current) =>
+      (current || []).map((bucket) => {
+        if (bucket.id !== bucketId) return bucket;
+
+        return {
+          ...bucket,
+          items: bucket.items.map((item, itemIndex) => (itemIndex === index ? nextName : item)),
+        };
+      })
+    );
+  }
+
+  function removeDraftBucketItem(bucketId, index) {
+    setDraftBuckets((current) =>
+      (current || []).map((bucket) =>
+        bucket.id === bucketId
+          ? { ...bucket, items: bucket.items.filter((_, itemIndex) => itemIndex !== index) }
+          : bucket
+      )
+    );
+  }
+
+  function handleDeleteBucket(bucket) {
+    if (!isEditMode) return;
+
+    const confirmed = window.confirm(`Eliminare il bucket "${bucket.group}" dalla bozza?`);
     if (!confirmed) return;
+
+    setDraftBuckets((current) => (current || []).filter((item) => item.id !== bucket.id));
+  }
+
+  function reconcileEffectiveItems(nextBuckets) {
+    const previousBucketsById = new Map(state.buckets.map((bucket) => [bucket.id, bucket]));
+    const nextBucketsById = new Map(nextBuckets.filter((bucket) => !bucket.id.startsWith("draft-")).map((bucket) => [bucket.id, bucket]));
+    const nameChanges = new Map();
+    const removedItems = [];
+    const renamedGroups = new Map();
+
+    state.buckets.forEach((previousBucket) => {
+      const nextBucket = nextBucketsById.get(previousBucket.id);
+      if (!nextBucket) {
+        previousBucket.items.forEach((item) => removedItems.push({ name: item, group: previousBucket.group }));
+        return;
+      }
+
+      if (!sameName(previousBucket.group, nextBucket.group)) {
+        renamedGroups.set(previousBucket.group, nextBucket.group);
+      }
+
+      previousBucket.items.forEach((previousItem, index) => {
+        if (nextBucket.items.some((nextItem) => sameName(nextItem, previousItem))) return;
+
+        const nextItemAtSameIndex = nextBucket.items[index];
+        const looksLikeRename =
+          nextItemAtSameIndex &&
+          !previousBucket.items.some((item) => sameName(item, nextItemAtSameIndex));
+
+        if (looksLikeRename) {
+          nameChanges.set(`${previousBucket.id}:${normalizeName(previousItem).toLowerCase()}`, {
+            from: previousItem,
+            to: normalizeName(nextItemAtSameIndex),
+            group: nextBucket.group,
+          });
+          return;
+        }
+
+        removedItems.push({ name: previousItem, group: previousBucket.group });
+      });
+    });
+
+    const affected = [];
+    const nextEffective = state.effective
+      .map((item) => {
+        if (item.source !== "essential") return item;
+
+        const previousBucket = [...previousBucketsById.values()].find((bucket) => sameName(bucket.group, item.group || ""));
+        const changeKey = previousBucket
+          ? `${previousBucket.id}:${normalizeName(item.name).toLowerCase()}`
+          : null;
+        const itemChange = changeKey ? nameChanges.get(changeKey) : null;
+
+        if (itemChange) {
+          affected.push(`${item.name} -> ${itemChange.to}`);
+          return { ...item, name: itemChange.to, group: itemChange.group };
+        }
+
+        const removed = removedItems.some((removedItem) => sameName(removedItem.name, item.name) && sameName(removedItem.group, item.group || ""));
+        if (removed) {
+          affected.push(`${item.name} rimosso dalla lista`);
+          return null;
+        }
+
+        const renamedGroup = item.group ? renamedGroups.get(item.group) : null;
+        return renamedGroup ? { ...item, group: renamedGroup } : item;
+      })
+      .filter(Boolean);
+
+    return { affected, nextEffective: sortEffectiveItems(nextEffective) };
+  }
+
+  async function handleSaveEdit() {
+    if (!canPersistBuckets || !isEditMode || !draftBuckets) return;
+
+    const cleanedBuckets = draftBuckets
+      .map((bucket) => ({
+        ...bucket,
+        group: normalizeName(bucket.group),
+        items: bucket.items.map(normalizeName).filter(Boolean),
+      }))
+      .filter((bucket) => bucket.group);
+
+    const { affected, nextEffective } = reconcileEffectiveItems(cleanedBuckets);
+    if (affected.length > 0) {
+      const preview = affected.slice(0, 8).join("\n- ");
+      const suffix = affected.length > 8 ? `\n...e altre ${affected.length - 8} modifiche` : "";
+      const confirmed = window.confirm(
+        `Alcuni oggetti gia presenti nella lista della spesa cambieranno:\n- ${preview}${suffix}\n\nVuoi applicare queste modifiche anche alla lista?`
+      );
+      if (!confirmed) return;
+    }
 
     setBucketError("");
     setBucketLoading(true);
 
     try {
-      if (canPersistBuckets) {
-        await deleteBucket(bucket.id, session.user.id);
-      }
+      const deletedBuckets = state.buckets.filter(
+        (bucket) => !cleanedBuckets.some((nextBucket) => nextBucket.id === bucket.id)
+      );
+      await Promise.all(deletedBuckets.map((bucket) => deleteBucket(bucket.id, session.user.id)));
 
-      persist({
-        ...state,
-        buckets: state.buckets.filter((item) => item.id !== bucket.id),
-        effective: state.effective.filter((item) => item.group !== bucket.group),
-      });
+      const savedBuckets = await Promise.all(
+        cleanedBuckets.map((bucket) => {
+          const payload = { name: bucket.group, items: bucket.items };
+          if (bucket.id.startsWith("draft-")) {
+            return createBucket(payload, session.user.id);
+          }
+
+          return updateBucket(bucket.id, payload, session.user.id);
+        })
+      );
+
+      persist({ ...state, buckets: savedBuckets, effective: nextEffective });
+      setDraftBuckets(null);
+      setIsEditMode(false);
+      setBucketName("");
     } catch (error) {
-      setBucketError(error.message || "Cannot delete bucket");
+      setBucketError(error.message || "Cannot save bucket changes");
     } finally {
       setBucketLoading(false);
     }
@@ -277,6 +447,7 @@ export default function App() {
           onContinueOffline={() => {
             setAuthError("");
             setAuthMode("guest");
+            persist({ ...state, buckets: DEFAULT_BUCKETS });
           }}
           onSubmit={handleAuthSubmit}
         />
@@ -299,11 +470,19 @@ export default function App() {
           canPersistBuckets={canPersistBuckets}
           collapsedGroups={collapsedGroups}
           essentialSearch={essentialSearch}
+          isEditMode={isEditMode}
           isInEffective={isInEffective}
           onAddBucket={handleAddBucket}
+          onAddBucketItem={addDraftBucketItem}
+          onCancelEdit={handleCancelEdit}
           onChangeBucketName={setBucketName}
           onChangeSearch={setEssentialSearch}
           onDeleteBucket={handleDeleteBucket}
+          onRemoveBucketItem={removeDraftBucketItem}
+          onRenameBucket={renameDraftBucket}
+          onRenameBucketItem={renameDraftBucketItem}
+          onSaveEdit={handleSaveEdit}
+          onStartEdit={handleStartEdit}
           onToggleGroup={toggleGroup}
           onToggleItem={onEssentialToggle}
         />

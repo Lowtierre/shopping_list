@@ -1,16 +1,16 @@
 import { createClient } from "@supabase/supabase-js";
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey);
+const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseKey);
 
 export const supabase = isSupabaseConfigured
-  ? createClient(supabaseUrl, supabaseAnonKey)
+  ? createClient(supabaseUrl, supabaseKey)
   : null;
 
 function requireSupabase() {
   if (!supabase) {
-    throw new Error("Supabase is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.");
+    throw new Error("Supabase is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY.");
   }
 
   return supabase;
@@ -90,4 +90,21 @@ export async function deleteBucket(bucketId, userId) {
     .eq("user_id", userId);
 
   if (error) throw error;
+}
+
+export async function updateBucket(bucketId, payload, userId) {
+  const client = requireSupabase();
+  const { data, error } = await client
+    .from("shopping_buckets")
+    .update({
+      name: payload.name,
+      items: payload.items || [],
+    })
+    .eq("id", bucketId)
+    .eq("user_id", userId)
+    .select("id,name,items")
+    .single();
+
+  if (error) throw error;
+  return toBucket(data);
 }
