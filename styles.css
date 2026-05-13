@@ -1,0 +1,29 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  html,
+  body,
+  #root {
+    width: 100%;
+    min-height: 100%;
+  }
+
+  body {
+    margin: 0;
+    background:
+      radial-gradient(1000px 600px at 20% 10%, rgba(122, 162, 255, 0.18), transparent 60%),
+      radial-gradient(900px 500px at 90% 20%, rgba(255, 92, 122, 0.12), transparent 60%),
+      #0b0d12;
+    background-attachment: fixed;
+    color: #eef2ff;
+  }
+}
