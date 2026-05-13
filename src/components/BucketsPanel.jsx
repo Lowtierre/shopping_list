@@ -29,7 +29,7 @@ export function BucketsPanel({
     <section className={card}>
       <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h2 className="m-0 mt-0.5 text-lg font-bold">Home Essentials</h2>
+          <h2 className="m-0 mt-0.5 text-lg font-bold">Prodotti di base</h2>
           {!canPersistBuckets ? (
             <p className="m-0 mt-1 text-xs text-[#b7c0d8]/90">
               Accedi per modificare i tuoi bucket privati.
@@ -41,14 +41,16 @@ export function BucketsPanel({
           ) : null}
         </div>
         <div className="flex flex-wrap items-center justify-end gap-2.5">
-          <input
-            className={input}
-            type="search"
-            placeholder="Search essentials..."
-            aria-label="Search essentials"
-            value={essentialSearch}
-            onChange={(event) => onChangeSearch(event.target.value)}
-          />
+          {!isEditMode ? (
+            <input
+              className={input}
+              type="search"
+              placeholder="Cerca prodotti di base..."
+              aria-label="Cerca prodotti di base"
+              value={essentialSearch}
+              onChange={(event) => onChangeSearch(event.target.value)}
+            />
+          ) : null}
           {canPersistBuckets && !isEditMode ? (
             <button className={primaryButton} type="button" onClick={onStartEdit}>
               Modifica
@@ -85,7 +87,7 @@ export function BucketsPanel({
 
       {bucketError ? <p className={errorText}>{bucketError}</p> : null}
 
-      <div className="grid gap-2.5">
+      <div className="grid gap-4">
         {buckets.map((bucket) => (
           <BucketGroup
             bucket={bucket}

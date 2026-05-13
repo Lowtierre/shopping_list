@@ -49,12 +49,12 @@ export function sortEffectiveItems(items) {
 export function buildShoppingListText(effectiveItems) {
   const lines = [];
   const now = new Date();
-  lines.push("Shopping List");
+  lines.push("Lista della spesa");
   lines.push(now.toLocaleString());
   lines.push("".padEnd(22, "-"));
 
   if (effectiveItems.length === 0) {
-    lines.push("(empty)");
+    lines.push("(vuota)");
     return lines.join("\n");
   }
 
@@ -63,7 +63,7 @@ export function buildShoppingListText(effectiveItems) {
   const byGroup = new Map();
 
   essentials.forEach((item) => {
-    const group = item.group || "Essentials";
+    const group = item.group || "Prodotti di base";
     if (!byGroup.has(group)) byGroup.set(group, []);
     byGroup.get(group).push(item.name);
   });
@@ -76,7 +76,7 @@ export function buildShoppingListText(effectiveItems) {
 
   if (custom.length > 0) {
     lines.push("");
-    lines.push("[Custom]");
+    lines.push("[Personalizzati]");
     custom
       .map((item) => item.name)
       .sort((a, b) => a.localeCompare(b))

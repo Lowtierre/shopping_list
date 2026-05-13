@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { dangerButton, input, primaryButton, pill } from "./uiClasses";
+import { Minus, Plus, Trash2 } from "lucide-react";
+import { dangerButton, input, primaryButton } from "./uiClasses";
 
 export function BucketGroup({
   bucket,
@@ -16,6 +17,10 @@ export function BucketGroup({
   onToggleItem,
 }) {
   const [newItemName, setNewItemName] = useState("");
+  const CollapseIcon = isCollapsed ? Plus : Minus;
+  const countLabel = `${bucket.items.length} element${bucket.items.length === 1 ? "o" : "i"}`;
+  const countPill =
+    "inline-flex items-center rounded-full border border-[#7aa2ff]/20 bg-[#7aa2ff]/[0.08] px-2 py-1 text-[11px] font-medium leading-none text-[#d9e3ff]";
 
   function submitItem(event) {
     event.preventDefault();
@@ -25,7 +30,7 @@ export function BucketGroup({
 
   return (
     <div className="overflow-hidden rounded-[14px] border border-white/10">
-      <div className="flex w-full items-center justify-between gap-2.5 border-0 border-b border-white/10 bg-white/[0.03] px-3 py-2.5 text-left text-[#eef2ff]">
+      <div className="flex w-full items-center justify-between gap-2.5 border-0 border-b border-[#7aa2ff]/20 bg-[#25304a] px-3 py-3 text-left text-[#eef2ff] shadow-[inset_0_-1px_0_rgba(255,255,255,0.04)]">
         {isEditMode ? (
           <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2.5">
             <input
@@ -33,10 +38,26 @@ export function BucketGroup({
               type="text"
               value={bucket.group}
               maxLength={60}
-              aria-label={`Rename ${bucket.group}`}
+              aria-label={`Rinomina ${bucket.group}`}
               onChange={(event) => onRenameBucket(bucket.id, event.target.value)}
             />
-            <span className={pill}>{bucket.items.length} items</span>
+            <button
+              className={dangerButton}
+              type="button"
+              onClick={() => onDeleteBucket(bucket)}
+              disabled={bucketLoading}
+            >
+                <Trash2 aria-hidden="true" size={17} strokeWidth={2.2} />
+            </button>
+            <button
+              type="button"
+              className="ml-auto inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl border border-white/15 bg-white/[0.08] text-[#eef2ff] hover:bg-white/[0.12]"
+              aria-expanded={!isCollapsed}
+              aria-label={`${isCollapsed ? "Apri" : "Chiudi"} ${bucket.group}`}
+              onClick={() => onToggleGroup(bucket.id)}
+            >
+              <CollapseIcon aria-hidden="true" size={18} strokeWidth={2.2} />
+            </button>
           </div>
         ) : (
           <button
@@ -46,14 +67,12 @@ export function BucketGroup({
             onClick={() => onToggleGroup(bucket.id)}
           >
             <div className="flex min-w-0 flex-wrap items-center gap-2.5">
-              <strong className="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-sm">
+              <strong className="min-w-0 overflow-hidden text-sm text-ellipsis whitespace-nowrap">
                 {bucket.group}
               </strong>
-              <span className={pill}>{bucket.items.length} items</span>
+              <span className={countPill}>{countLabel}</span>
             </div>
-            <span className={`opacity-85 transition-transform duration-150 ${isCollapsed ? "-rotate-90" : ""}`}>
-              v
-            </span>
+            <CollapseIcon aria-hidden="true" size={18} strokeWidth={2.2} />
           </button>
         )}
       </div>
@@ -75,16 +94,17 @@ export function BucketGroup({
                 type="text"
                 value={name}
                 maxLength={60}
-                aria-label={`Rename ${name}`}
+                aria-label={`Rinomina ${name}`}
                 onChange={(event) => onRenameBucketItem(bucket.id, index, event.target.value)}
               />
               <button
-                className={dangerButton}
+                className="inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl border border-[#ff5c7a]/55 bg-[#ff5c7a]/[0.12] text-[#eef2ff] transition active:translate-y-px hover:border-[#ff5c7a]/75 hover:bg-[#ff5c7a]/[0.16] disabled:cursor-not-allowed disabled:opacity-60"
                 type="button"
                 onClick={() => onRemoveBucketItem(bucket.id, index)}
                 disabled={bucketLoading}
+                aria-label={`Rimuovi ${name}`}
               >
-                Rimuovi
+                <Trash2 aria-hidden="true" size={17} strokeWidth={2.2} />
               </button>
             </div>
           ) : (
@@ -122,14 +142,6 @@ export function BucketGroup({
               Aggiungi
             </button>
           </form>
-          <button
-            className={dangerButton}
-            type="button"
-            onClick={() => onDeleteBucket(bucket)}
-            disabled={bucketLoading}
-          >
-            Elimina bucket
-          </button>
         </div>
       ) : null}
     </div>

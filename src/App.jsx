@@ -31,6 +31,7 @@ export default function App() {
   const [state, setState] = useState(loadStoredState);
   const [session, setSession] = useState(null);
   const [authMode, setAuthMode] = useState("checking");
+  const [authView, setAuthView] = useState("login");
   const [essentialSearch, setEssentialSearch] = useState("");
   const [customItem, setCustomItem] = useState("");
   const [bucketName, setBucketName] = useState("");
@@ -50,14 +51,14 @@ export default function App() {
   useEffect(() => {
     async function bootstrapAuth() {
       if (!isSupabaseConfigured) {
-        setAuthMode("prompt");
+        setAuthMode("guest");
         return;
       }
 
       try {
         const currentSession = await getSession();
         if (!currentSession?.user) {
-          setAuthMode("prompt");
+          setAuthMode("guest");
           return;
         }
 
@@ -65,8 +66,8 @@ export default function App() {
         setAuthMode("authenticated");
         await loadRemoteBuckets(currentSession.user.id);
       } catch (error) {
-        setAuthError(error.message || "Cannot restore session");
-        setAuthMode("prompt");
+        setAuthError(error.message || "Impossibile ripristinare la sessione");
+        setAuthMode("guest");
       }
     }
 
@@ -162,7 +163,7 @@ export default function App() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = "shopping-list.txt";
+    link.download = "lista-della-spesa.txt";
     document.body.appendChild(link);
     link.click();
     link.remove();
@@ -185,7 +186,7 @@ export default function App() {
     try {
       const nextSession = mode === "signup" ? await signUp(credentials) : await login(credentials);
       if (!nextSession?.user) {
-        setAuthError("Check your email to confirm the account, then sign in.");
+        setAuthError("Controlla la tua email per confermare l'account, poi accedi.");
         return;
       }
 
@@ -193,7 +194,7 @@ export default function App() {
       setAuthMode("authenticated");
       await loadRemoteBuckets(nextSession.user.id);
     } catch (error) {
-      setAuthError(error.message || "Authentication error");
+      setAuthError(error.message || "Errore di autenticazione");
     } finally {
       setAuthLoading(false);
     }
@@ -205,14 +206,26 @@ export default function App() {
     try {
       await logout();
     } catch (error) {
-      setAuthError(error.message || "Logout error");
+      setAuthError(error.message || "Errore durante l'uscita");
     } finally {
       setSession(null);
-      setAuthMode("prompt");
+      setAuthMode("guest");
+      setAuthView("login");
       setDraftBuckets(null);
       setIsEditMode(false);
       persist({ ...state, buckets: DEFAULT_BUCKETS });
     }
+  }
+
+  function openAuthPrompt(nextView = "login") {
+    setAuthError("");
+    setAuthView(nextView);
+    setAuthMode("prompt");
+  }
+
+  function closeAuthPrompt() {
+    setAuthError("");
+    setAuthMode(session?.user ? "authenticated" : "guest");
   }
 
   async function handleAddBucket(event) {
@@ -418,7 +431,7 @@ export default function App() {
       setIsEditMode(false);
       setBucketName("");
     } catch (error) {
-      setBucketError(error.message || "Cannot save bucket changes");
+      setBucketError(error.message || "Impossibile salvare le modifiche ai bucket");
     } finally {
       setBucketLoading(false);
     }
@@ -439,16 +452,17 @@ export default function App() {
 
       {authMode === "prompt" ? (
         <AuthPrompt
+          authView={authView}
           authError={authError}
           authLoading={authLoading}
           credentials={credentials}
           isSupabaseConfigured={isSupabaseConfigured}
-          onChangeCredentials={updateCredential}
-          onContinueOffline={() => {
+          onChangeAuthView={(nextView) => {
             setAuthError("");
-            setAuthMode("guest");
-            persist({ ...state, buckets: DEFAULT_BUCKETS });
+            setAuthView(nextView);
           }}
+          onChangeCredentials={updateCredential}
+          onClose={closeAuthPrompt}
           onSubmit={handleAuthSubmit}
         />
       ) : null}
@@ -456,7 +470,7 @@ export default function App() {
       <AppHeader
         canPersistBuckets={canPersistBuckets}
         isAuthenticated={isAuthenticated}
-        onLogin={() => setAuthMode("prompt")}
+        onLogin={() => openAuthPrompt("login")}
         onLogout={handleLogout}
         userEmail={session?.user?.email}
       />

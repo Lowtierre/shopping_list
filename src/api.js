@@ -10,7 +10,7 @@ export const supabase = isSupabaseConfigured
 
 function requireSupabase() {
   if (!supabase) {
-    throw new Error("Supabase is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY.");
+    throw new Error("Supabase non e configurato. Aggiungi VITE_SUPABASE_URL e VITE_SUPABASE_PUBLISHABLE_KEY.");
   }
 
   return supabase;

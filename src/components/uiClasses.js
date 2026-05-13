@@ -19,6 +19,6 @@ export const dangerButton =
   "cursor-pointer select-none rounded-xl border border-[#ff5c7a]/55 bg-[#ff5c7a]/[0.12] px-3 py-2.5 text-[#eef2ff] transition active:translate-y-px hover:border-[#ff5c7a]/75 hover:bg-[#ff5c7a]/[0.16] disabled:cursor-not-allowed disabled:opacity-60";
 
 export const pill =
-  "inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-2.5 py-1.5 text-xs text-[#b7c0d8]";
+  "inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2.5 text-[#b7c0d8]";
 
 export const errorText = "m-0 mt-3 text-[13px] text-[#ff9db1]";
