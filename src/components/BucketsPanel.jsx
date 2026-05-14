@@ -27,12 +27,12 @@ export function BucketsPanel({
 }) {
   return (
     <section className={card}>
-      <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
         <div>
-          <h2 className="m-0 mt-0.5 text-lg font-bold">Prodotti di base</h2>
+          <h2 className="mb-2 text-xl font-bold">Prodotti di base</h2>
           {!canPersistBuckets ? (
             <p className="m-0 mt-1 text-xs text-[#b7c0d8]/90">
-              Accedi per modificare i tuoi bucket privati.
+              Accedi per modificare le tue categorie private.
             </p>
           ) : isEditMode ? (
             <p className="m-0 mt-1 text-xs text-[#b7c0d8]/90">
@@ -74,13 +74,13 @@ export function BucketsPanel({
           <input
             className={`${input} min-w-[180px] flex-1`}
             type="text"
-            placeholder="Nome nuovo bucket"
+            placeholder="Nome nuova categoria"
             value={bucketName}
             onChange={(event) => onChangeBucketName(event.target.value)}
             maxLength={60}
           />
           <button className={primaryButton} type="submit" disabled={bucketLoading}>
-            Aggiungi bucket
+            Aggiungi categoria
           </button>
         </form>
       ) : null}

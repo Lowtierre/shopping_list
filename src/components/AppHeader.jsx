@@ -7,7 +7,7 @@ export function AppHeader({ canPersistBuckets, isAuthenticated, onLogin, onLogou
         <div>
           <h1 className="m-0 text-[28px] font-bold">Lista della spesa</h1>
           <p className="m-0 mt-2 text-[#b7c0d8]">
-            Scegli dai prodotti di base, aggiungi elementi personalizzati e sincronizza i tuoi bucket privati.
+            Scegli dai prodotti di base, aggiungi elementi personalizzati e sincronizza le tue categorie private.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2.5">

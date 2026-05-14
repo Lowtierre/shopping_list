@@ -29,8 +29,8 @@ export function EffectiveListPanel({
 
   return (
     <section className={card}>
-      <div className="flex flex-wrap items-start justify-between gap-3 mb-3">
-        <h2 className="m-0 mt-0.5 text-lg font-bold">Lista della spesa</h2>
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
+        <h2 className="mb-2 text-xl font-bold">Lista della spesa</h2>
         <div className="flex flex-wrap items-center justify-end gap-2.5">
           <button
             id="downloadBtn"
@@ -52,8 +52,8 @@ export function EffectiveListPanel({
         <input
           className={`${input} min-w-0 flex-1`}
           type="text"
-          placeholder="Aggiungi un elemento (es. caffe)"
-          aria-label="Aggiungi un elemento"
+          placeholder="Aggiungi un elemento fuori categoria"
+          aria-label="Aggiungi un elemento fuori categoria"
           maxLength={60}
           value={customItem}
           onChange={(event) => onChangeCustomItem(event.target.value)}

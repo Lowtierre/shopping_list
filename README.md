@@ -1,19 +1,19 @@
 Shopping List (React + Supabase)
 
-React + Vite shopping list with local persistence, Supabase Auth, per-user bucket persistence, and one saved shopping list per user on Supabase Postgres.
+React + Vite shopping list with local persistence, Supabase Auth, per-user category persistence, and one saved shopping list per user on Supabase Postgres.
 
 ## Features
-- Essentials buckets with checkbox add/remove flow
+- Essentials categories with checkbox add/remove flow
 - Effective list (custom add/remove, quantity, unit of measure), saved per authenticated user, and PDF export
 - Initial auth prompt with login, sign up, or offline mode
-- Bucket structural operations (create/delete) persisted to Supabase when authenticated
+- Category structural operations (create/delete) persisted to Supabase when authenticated
 - LocalStorage fallback when the user continues offline or Supabase is not configured
 
 ## Architecture
 This app does not need an Express server for the current scope.
 
 - Supabase Auth handles user sessions directly from the browser.
-- Supabase Postgres stores user-owned buckets and one shopping list row per user.
+- Supabase Postgres stores user-owned categories and one shopping list row per user.
 - Row Level Security keeps each user scoped to their own rows.
 - Vercel only needs to host the static Vite app for now.
 
@@ -36,7 +36,7 @@ VITE_SUPABASE_PUBLISHABLE_KEY=your-public-publishable-key
 Only use the public publishable key in `VITE_*` variables. Never expose the Supabase service role key in this React app.
 
 ## Supabase setup
-Create the bucket and shopping list tables in the Supabase SQL editor:
+Create the category and shopping list tables in the Supabase SQL editor:
 
 ```sql
 create table public.shopping_buckets (
@@ -108,7 +108,7 @@ create policy "Users can update own shopping list"
 
 `shopping_lists.user_id` is the primary key, so each authenticated user can have only one saved shopping list. The `items` JSONB field stores the effective list objects used by the client (`id`, `name`, `source`, `group`, `quantity`, `unit`, `createdAt`). Older saved items without `quantity` or `unit` are normalized by the client to `1` and `unità`.
 
-On first authenticated login, the app seeds the default buckets into that user's `shopping_buckets` rows if none exist yet. It also creates the user's single `shopping_lists` row if missing, starting from the current local list.
+On first authenticated login, the app seeds the default categories into that user's `shopping_buckets` rows if none exist yet. It also creates the user's single `shopping_lists` row if missing, starting from the current local list.
 
 ## Build
 - `npm run build`

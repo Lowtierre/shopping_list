@@ -24,8 +24,8 @@ export function AuthPrompt({
             </h2>
             <p className="m-0 mt-2 text-sm text-[#b7c0d8]">
               {isSignup
-                ? "Crea un account per salvare e sincronizzare i tuoi bucket privati."
-                : "Accedi per modificare e sincronizzare i tuoi bucket privati."}
+                ? "Crea un account per salvare e sincronizzare le tue categorie private."
+                : "Accedi per modificare e sincronizzare le tue categorie private."}
             </p>
           </div>
           <button

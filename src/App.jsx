@@ -353,7 +353,7 @@ export default function App() {
   function handleDeleteBucket(bucket) {
     if (!isEditMode) return;
 
-    const confirmed = window.confirm(`Eliminare il bucket "${bucket.group}" dalla bozza?`);
+    const confirmed = window.confirm(`Eliminare la categoria "${bucket.group}" dalla bozza?`);
     if (!confirmed) return;
 
     setDraftBuckets((current) => (current || []).filter((item) => item.id !== bucket.id));
@@ -475,7 +475,7 @@ export default function App() {
       setIsEditMode(false);
       setBucketName("");
     } catch (error) {
-      setBucketError(error.message || "Impossibile salvare le modifiche ai bucket");
+      setBucketError(error.message || "Impossibile salvare le modifiche alle categorie");
     } finally {
       setBucketLoading(false);
     }
