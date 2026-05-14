@@ -21,7 +21,7 @@ import {
 } from "./api";
 import { DEFAULT_BUCKETS, STORAGE_KEY } from "./constants";
 import {
-  buildShoppingListText,
+  buildShoppingListPdfBlob,
   createId,
   DEFAULT_QUANTITY,
   DEFAULT_UNIT,
@@ -201,14 +201,12 @@ export default function App() {
     removeFromEffectiveByName(itemName);
   }
 
-  function downloadTxt() {
-    const blob = new Blob([buildShoppingListText(state.effective)], {
-      type: "text/plain;charset=utf-8",
-    });
+  function downloadPdf() {
+    const blob = buildShoppingListPdfBlob(state.effective);
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = "lista-della-spesa.txt";
+    link.download = "lista-della-spesa.pdf";
     document.body.appendChild(link);
     link.click();
     link.remove();
@@ -556,7 +554,7 @@ export default function App() {
           onAddCustomItem={handleAddCustomItem}
           onChangeCustomItem={setCustomItem}
           onClear={clearEffective}
-          onDownload={downloadTxt}
+          onDownload={downloadPdf}
           onRemoveItem={removeFromEffectiveById}
           onUpdateItem={updateEffectiveItem}
         />

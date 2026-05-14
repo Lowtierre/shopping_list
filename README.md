@@ -4,7 +4,7 @@ React + Vite shopping list with local persistence, Supabase Auth, per-user bucke
 
 ## Features
 - Essentials buckets with checkbox add/remove flow
-- Effective list (custom add/remove, quantity, unit of measure), saved per authenticated user, and `.txt` export
+- Effective list (custom add/remove, quantity, unit of measure), saved per authenticated user, and PDF export
 - Initial auth prompt with login, sign up, or offline mode
 - Bucket structural operations (create/delete) persisted to Supabase when authenticated
 - LocalStorage fallback when the user continues offline or Supabase is not configured

@@ -78,7 +78,7 @@ export function BucketGroup({
       </div>
 
       <div
-        className={`grid grid-cols-1 gap-1.5 px-3 pt-2.5 min-[540px]:grid-cols-2 ${
+        className={`grid grid-cols-1 gap-1.5 px-3 py-2.5 min-[540px]:grid-cols-2 ${
           isCollapsed ? "hidden" : ""
         }`}
       >

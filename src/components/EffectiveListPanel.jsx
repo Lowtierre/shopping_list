@@ -25,7 +25,7 @@ export function EffectiveListPanel({
         <h2 className="m-0 mt-0.5 text-lg font-bold">Lista della spesa</h2>
         <div className="flex flex-wrap items-center justify-end gap-2.5">
           <button id="downloadBtn" className={primaryButton} type="button" onClick={onDownload}>
-            Scarica .txt
+            Scarica PDF
           </button>
           <button id="clearBtn" className={dangerButton} type="button" onClick={onClear}>
             Svuota

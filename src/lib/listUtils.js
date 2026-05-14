@@ -71,12 +71,10 @@ export function sortEffectiveItems(items) {
   });
 }
 
-export function buildShoppingListText(effectiveItems) {
+export function buildShoppingListLines(effectiveItems) {
   const lines = [];
-  const now = new Date();
   lines.push("Lista della spesa");
-  lines.push(now.toLocaleString());
-  lines.push("".padEnd(22, "-"));
+  lines.push("".padEnd(36, "-"));
 
   if (effectiveItems.length === 0) {
     lines.push("(vuota)");
@@ -109,5 +107,107 @@ export function buildShoppingListText(effectiveItems) {
       .forEach((item) => lines.push(`- ${item.name} (${item.quantity} ${item.unit})`));
   }
 
-  return lines.join("\n");
+  return lines;
+}
+
+export function buildShoppingListText(effectiveItems) {
+  return buildShoppingListLines(effectiveItems).join("\n");
+}
+
+function toPdfTextHex(text) {
+  const bytes = [];
+  for (const char of text) {
+    const code = char.codePointAt(0);
+    bytes.push(code <= 0xff ? code : 0x3f);
+  }
+
+  return bytes.map((byte) => byte.toString(16).padStart(2, "0")).join("").toUpperCase();
+}
+
+function wrapLine(line, maxLength = 82) {
+  if (line.length <= maxLength) return [line];
+
+  const words = line.split(" ");
+  const wrapped = [];
+  let current = "";
+
+  words.forEach((word) => {
+    const next = current ? `${current} ${word}` : word;
+    if (next.length > maxLength && current) {
+      wrapped.push(current);
+      current = word;
+      return;
+    }
+
+    current = next;
+  });
+
+  if (current) wrapped.push(current);
+  return wrapped;
+}
+
+export function buildShoppingListPdfBlob(effectiveItems) {
+  const wrappedLines = buildShoppingListLines(effectiveItems).flatMap((line) => wrapLine(line));
+  const pages = [];
+  let currentPage = [];
+
+  wrappedLines.forEach((line, index) => {
+    const isTitle = index === 0;
+    const maxLines = isTitle ? 42 : 45;
+    if (currentPage.length >= maxLines) {
+      pages.push(currentPage);
+      currentPage = [];
+    }
+
+    currentPage.push({ text: line, isTitle });
+  });
+
+  if (currentPage.length > 0) pages.push(currentPage);
+
+  const objects = [];
+  const pageObjectIds = [];
+  const contentObjectIds = [];
+  const fontObjectId = 3;
+  let nextObjectId = 4;
+
+  pages.forEach(() => {
+    pageObjectIds.push(nextObjectId);
+    contentObjectIds.push(nextObjectId + 1);
+    nextObjectId += 2;
+  });
+
+  objects[1] = "<< /Type /Catalog /Pages 2 0 R >>";
+  objects[2] = `<< /Type /Pages /Kids [${pageObjectIds.map((id) => `${id} 0 R`).join(" ")}] /Count ${pages.length} >>`;
+  objects[fontObjectId] = "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>";
+
+  pages.forEach((pageLines, pageIndex) => {
+    const pageObjectId = pageObjectIds[pageIndex];
+    const contentObjectId = contentObjectIds[pageIndex];
+    const content = pageLines
+      .map((line, lineIndex) => {
+        const fontSize = line.isTitle ? 18 : 11;
+        const y = 792 - lineIndex * 17;
+        return `BT /F1 ${fontSize} Tf 50 ${y} Td <${toPdfTextHex(line.text)}> Tj ET`;
+      })
+      .join("\n");
+
+    objects[pageObjectId] = `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 ${fontObjectId} 0 R >> >> /Contents ${contentObjectId} 0 R >>`;
+    objects[contentObjectId] = `<< /Length ${content.length} >>\nstream\n${content}\nendstream`;
+  });
+
+  let pdf = "%PDF-1.4\n";
+  const offsets = [0];
+  for (let id = 1; id < objects.length; id += 1) {
+    offsets[id] = pdf.length;
+    pdf += `${id} 0 obj\n${objects[id]}\nendobj\n`;
+  }
+
+  const xrefOffset = pdf.length;
+  pdf += `xref\n0 ${objects.length}\n0000000000 65535 f \n`;
+  for (let id = 1; id < objects.length; id += 1) {
+    pdf += `${String(offsets[id]).padStart(10, "0")} 00000 n \n`;
+  }
+  pdf += `trailer\n<< /Size ${objects.length} /Root 1 0 R >>\nstartxref\n${xrefOffset}\n%%EOF`;
+
+  return new Blob([pdf], { type: "application/pdf" });
 }
