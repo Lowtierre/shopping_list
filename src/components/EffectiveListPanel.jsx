@@ -1,5 +1,6 @@
-import { Trash2 } from "lucide-react";
-import { card, dangerButton, errorText, input, pill, primaryButton } from "./uiClasses";
+import { Minus, Plus, Trash2 } from "lucide-react";
+import { UNIT_OPTIONS } from "../lib/listUtils";
+import { card, dangerButton, errorText, input, primaryButton } from "./uiClasses";
 
 export function EffectiveListPanel({
   customItem,
@@ -10,7 +11,14 @@ export function EffectiveListPanel({
   onClear,
   onDownload,
   onRemoveItem,
+  onUpdateItem,
 }) {
+  function stepQuantity(item, direction) {
+    const currentQuantity = Number.parseInt(item.quantity, 10) || 1;
+    const nextQuantity = Math.max(1, currentQuantity + direction);
+    onUpdateItem(item.id, { quantity: nextQuantity });
+  }
+
   return (
     <section className={card}>
       <div className="flex flex-wrap items-start justify-between gap-3 mb-3">
@@ -43,21 +51,57 @@ export function EffectiveListPanel({
       <ul className="grid gap-2 p-0 m-0 list-none" aria-label="Lista della spesa">
         {effectiveItems.map((item) => (
           <li
-            className="flex items-center justify-between gap-2.5 rounded-[14px] border border-white/10 bg-white/[0.03] px-3 py-2.5"
+            className="grid gap-2.5 rounded-[14px] border border-white/10 bg-white/[0.03] px-3 py-2.5 min-[620px]:grid-cols-[minmax(0,1fr)_72px_104px_42px] min-[620px]:items-center"
             key={item.id}
           >
-            <div className="flex min-w-0 max-w-full items-center gap-2.5 overflow-hidden">
-              <span className="whitespace-nowrap rounded-full border border-white/10 bg-white/[0.03] px-2 py-[3px] text-[11px] text-[#eef2ff]/70">
-                {item.source === "essential" ? item.group || "Base" : "Personalizzato"}
-              </span>
-              <span className="overflow-hidden text-ellipsis whitespace-nowrap">{item.name}</span>
+            <span className="overflow-hidden text-ellipsis whitespace-nowrap">{item.name}</span>
+            <div className="grid h-9 grid-cols-[minmax(0,1fr)_24px] overflow-hidden rounded-xl border border-white/10 bg-white/[0.04]">
+              <input
+                className="quantity-input min-w-0 bg-transparent px-2.5 py-1.5 text-[#eef2ff] outline-none disabled:cursor-not-allowed disabled:opacity-60"
+                type="number"
+                min="1"
+                value={item.quantity}
+                onChange={(event) => onUpdateItem(item.id, { quantity: event.target.value })}
+                aria-label={`Quantita ${item.name}`}
+              />
+              <div className="grid border-l border-white/10">
+                <button
+                  className="grid cursor-pointer place-items-center text-[#eef2ff]/80 transition hover:bg-white/[0.07] hover:text-[#eef2ff]"
+                  type="button"
+                  onClick={() => stepQuantity(item, 1)}
+                  aria-label={`Aumenta quantita ${item.name}`}
+                >
+                  <Plus aria-hidden="true" size={12} strokeWidth={2.4} />
+                </button>
+                <button
+                  className="grid cursor-pointer place-items-center border-t border-white/10 text-[#eef2ff]/80 transition hover:bg-white/[0.07] hover:text-[#eef2ff]"
+                  type="button"
+                  onClick={() => stepQuantity(item, -1)}
+                  aria-label={`Diminuisci quantita ${item.name}`}
+                >
+                  <Minus aria-hidden="true" size={12} strokeWidth={2.4} />
+                </button>
+              </div>
             </div>
+            <select
+              className={`${input} unit-select h-9 w-full px-2.5 pb-2 pt-1`}
+              value={item.unit}
+              onChange={(event) => onUpdateItem(item.id, { unit: event.target.value })}
+              aria-label={`Unita di misura ${item.name}`}
+            >
+              {UNIT_OPTIONS.map((unit) => (
+                <option className="bg-[#121620] text-[#eef2ff]" value={unit} key={unit}>
+                  {unit}
+                </option>
+              ))}
+            </select>
             <button
-              className="cursor-pointer rounded-xl border border-white/10 bg-white/[0.03] px-2.5 py-2 text-[#eef2ff] hover:bg-white/[0.05]"
+              className="grid h-10 w-full cursor-pointer place-items-center rounded-xl border border-white/10 bg-white/[0.03] px-2.5 py-2 text-[#eef2ff] hover:bg-white/[0.05] min-[620px]:w-10"
               type="button"
               onClick={() => onRemoveItem(item.id)}
+              aria-label={`Rimuovi ${item.name}`}
             >
-                <Trash2 aria-hidden="true" size={17} strokeWidth={2.2} />
+              <Trash2 aria-hidden="true" size={17} strokeWidth={2.2} />
             </button>
           </li>
         ))}

@@ -1,5 +1,9 @@
 import { DEFAULT_BUCKETS, STORAGE_KEY } from "../constants";
 
+export const DEFAULT_QUANTITY = 1;
+export const DEFAULT_UNIT = "unità";
+export const UNIT_OPTIONS = ["unità", "g", "kg", "ml", "l", "pz"];
+
 export function normalizeName(name) {
   return name.trim().replace(/\s+/g, " ");
 }
@@ -12,6 +16,27 @@ export function createId() {
   return Math.random().toString(16).slice(2) + Date.now().toString(16);
 }
 
+export function normalizeQuantity(quantity) {
+  const numericQuantity = Number.parseInt(quantity, 10);
+  return Number.isFinite(numericQuantity) && numericQuantity >= 1 ? numericQuantity : DEFAULT_QUANTITY;
+}
+
+export function normalizeUnit(unit) {
+  return UNIT_OPTIONS.includes(unit) ? unit : DEFAULT_UNIT;
+}
+
+export function normalizeEffectiveItem(item) {
+  return {
+    ...item,
+    quantity: normalizeQuantity(item?.quantity),
+    unit: normalizeUnit(item?.unit),
+  };
+}
+
+export function normalizeEffectiveItems(items) {
+  return Array.isArray(items) ? items.map(normalizeEffectiveItem) : [];
+}
+
 export function loadStoredState() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -21,7 +46,7 @@ export function loadStoredState() {
 
     const parsed = JSON.parse(raw);
     return {
-      effective: Array.isArray(parsed.effective) ? parsed.effective : [],
+      effective: normalizeEffectiveItems(parsed.effective),
       buckets: Array.isArray(parsed.buckets) ? parsed.buckets : DEFAULT_BUCKETS,
     };
   } catch {
@@ -38,7 +63,7 @@ export function createLocalBucket(name) {
 }
 
 export function sortEffectiveItems(items) {
-  return [...items].sort((a, b) => {
+  return normalizeEffectiveItems(items).sort((a, b) => {
     const aRank = a.source === "essential" ? 0 : 1;
     const bRank = b.source === "essential" ? 0 : 1;
     if (aRank !== bRank) return aRank - bRank;
@@ -65,22 +90,23 @@ export function buildShoppingListText(effectiveItems) {
   essentials.forEach((item) => {
     const group = item.group || "Prodotti di base";
     if (!byGroup.has(group)) byGroup.set(group, []);
-    byGroup.get(group).push(item.name);
+    byGroup.get(group).push(item);
   });
 
   for (const [group, items] of [...byGroup.entries()].sort((a, b) => a[0].localeCompare(b[0]))) {
     lines.push("");
     lines.push(`[${group}]`);
-    items.sort((a, b) => a.localeCompare(b)).forEach((name) => lines.push(`- ${name}`));
+    items
+      .sort((a, b) => a.name.localeCompare(b.name))
+      .forEach((item) => lines.push(`- ${item.name} (${item.quantity} ${item.unit})`));
   }
 
   if (custom.length > 0) {
     lines.push("");
     lines.push("[Personalizzati]");
     custom
-      .map((item) => item.name)
-      .sort((a, b) => a.localeCompare(b))
-      .forEach((name) => lines.push(`- ${name}`));
+      .sort((a, b) => a.name.localeCompare(b.name))
+      .forEach((item) => lines.push(`- ${item.name} (${item.quantity} ${item.unit})`));
   }
 
   return lines.join("\n");

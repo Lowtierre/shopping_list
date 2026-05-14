@@ -23,7 +23,10 @@ import { DEFAULT_BUCKETS, STORAGE_KEY } from "./constants";
 import {
   buildShoppingListText,
   createId,
+  DEFAULT_QUANTITY,
+  DEFAULT_UNIT,
   loadStoredState,
+  normalizeEffectiveItem,
   normalizeName,
   sameName,
   sortEffectiveItems,
@@ -153,10 +156,19 @@ export default function App() {
         name: normalized,
         source,
         group: group || undefined,
+        quantity: DEFAULT_QUANTITY,
+        unit: DEFAULT_UNIT,
         createdAt: Date.now(),
       },
     ]);
 
+    persistShoppingListState({ ...state, effective: nextEffective });
+  }
+
+  function updateEffectiveItem(id, patch) {
+    const nextEffective = state.effective.map((item) =>
+      item.id === id ? normalizeEffectiveItem({ ...item, ...patch }) : item
+    );
     persistShoppingListState({ ...state, effective: nextEffective });
   }
 
@@ -546,6 +558,7 @@ export default function App() {
           onClear={clearEffective}
           onDownload={downloadTxt}
           onRemoveItem={removeFromEffectiveById}
+          onUpdateItem={updateEffectiveItem}
         />
       </main>
 

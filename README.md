@@ -4,7 +4,7 @@ React + Vite shopping list with local persistence, Supabase Auth, per-user bucke
 
 ## Features
 - Essentials buckets with checkbox add/remove flow
-- Effective list (custom add/remove), saved per authenticated user, and `.txt` export
+- Effective list (custom add/remove, quantity, unit of measure), saved per authenticated user, and `.txt` export
 - Initial auth prompt with login, sign up, or offline mode
 - Bucket structural operations (create/delete) persisted to Supabase when authenticated
 - LocalStorage fallback when the user continues offline or Supabase is not configured
@@ -106,7 +106,7 @@ create policy "Users can update own shopping list"
   with check ((select auth.uid()) = user_id);
 ```
 
-`shopping_lists.user_id` is the primary key, so each authenticated user can have only one saved shopping list. The `items` JSONB field stores the effective list objects used by the client (`id`, `name`, `source`, `group`, `createdAt`).
+`shopping_lists.user_id` is the primary key, so each authenticated user can have only one saved shopping list. The `items` JSONB field stores the effective list objects used by the client (`id`, `name`, `source`, `group`, `quantity`, `unit`, `createdAt`). Older saved items without `quantity` or `unit` are normalized by the client to `1` and `unità`.
 
 On first authenticated login, the app seeds the default buckets into that user's `shopping_buckets` rows if none exist yet. It also creates the user's single `shopping_lists` row if missing, starting from the current local list.
 
