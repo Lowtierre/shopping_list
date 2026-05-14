@@ -2,7 +2,7 @@ import { DEFAULT_BUCKETS, STORAGE_KEY } from "../constants";
 
 export const DEFAULT_QUANTITY = 1;
 export const DEFAULT_UNIT = "unità";
-export const UNIT_OPTIONS = ["unità", "g", "kg", "ml", "l", "pz"];
+export const UNIT_OPTIONS = ["unità", "g", "kg", "ml", "l"];
 
 export function normalizeName(name) {
   return name.trim().replace(/\s+/g, " ");
