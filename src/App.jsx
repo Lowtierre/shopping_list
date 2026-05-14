@@ -9,11 +9,13 @@ import { pageWidth } from "./components/uiClasses";
 import {
   createBucket,
   deleteBucket,
+  getShoppingList,
   getSession,
   isSupabaseConfigured,
   listBuckets,
   login,
   logout,
+  saveShoppingList,
   signUp,
   updateBucket,
 } from "./api";
@@ -27,6 +29,8 @@ import {
   sortEffectiveItems,
 } from "./lib/listUtils";
 
+const EMPTY_CREDENTIALS = { email: "", password: "" };
+
 export default function App() {
   const [state, setState] = useState(loadStoredState);
   const [session, setSession] = useState(null);
@@ -37,12 +41,13 @@ export default function App() {
   const [bucketName, setBucketName] = useState("");
   const [draftBuckets, setDraftBuckets] = useState(null);
   const [isEditMode, setIsEditMode] = useState(false);
-  const [credentials, setCredentials] = useState({ email: "", password: "" });
+  const [credentials, setCredentials] = useState(EMPTY_CREDENTIALS);
   const [collapsedGroups, setCollapsedGroups] = useState({});
   const [authLoading, setAuthLoading] = useState(false);
   const [bucketLoading, setBucketLoading] = useState(false);
   const [authError, setAuthError] = useState("");
   const [bucketError, setBucketError] = useState("");
+  const [listError, setListError] = useState("");
 
   const isAuthenticated = authMode === "authenticated" && session?.user;
   const canPersistBuckets = Boolean(isAuthenticated && isSupabaseConfigured);
@@ -64,7 +69,7 @@ export default function App() {
 
         setSession(currentSession);
         setAuthMode("authenticated");
-        await loadRemoteBuckets(currentSession.user.id);
+        await loadRemoteData(currentSession.user.id);
       } catch (error) {
         setAuthError(error.message || "Impossibile ripristinare la sessione");
         setAuthMode("guest");
@@ -74,24 +79,52 @@ export default function App() {
     bootstrapAuth();
   }, []);
 
-  function persist(nextState) {
+  function persistLocal(nextState) {
     setState(nextState);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(nextState));
   }
 
-  async function loadRemoteBuckets(userId) {
+  async function syncShoppingList(effectiveItems, userId = session?.user?.id) {
+    if (!isSupabaseConfigured || !userId) return;
+
+    setListError("");
+    try {
+      await saveShoppingList(effectiveItems, userId);
+    } catch (error) {
+      setListError(error.message || "Impossibile salvare la lista della spesa");
+    }
+  }
+
+  function persistShoppingListState(nextState) {
+    persistLocal(nextState);
+    void syncShoppingList(nextState.effective);
+  }
+
+  async function ensureRemoteBuckets(userId) {
     const remoteBuckets = await listBuckets(userId);
     if (remoteBuckets.length > 0) {
-      persist({ ...state, buckets: remoteBuckets });
-      return;
+      return remoteBuckets;
     }
 
-    const seededBuckets = await Promise.all(
+    return Promise.all(
       DEFAULT_BUCKETS.map((bucket) =>
         createBucket({ name: bucket.group, items: bucket.items }, userId)
       )
     );
-    persist({ ...state, buckets: seededBuckets });
+  }
+
+  async function loadRemoteData(userId) {
+    const [remoteBuckets, remoteShoppingList] = await Promise.all([
+      ensureRemoteBuckets(userId),
+      getShoppingList(userId),
+    ]);
+    const nextEffective = remoteShoppingList === null ? state.effective : sortEffectiveItems(remoteShoppingList);
+
+    if (remoteShoppingList === null) {
+      await saveShoppingList(nextEffective, userId);
+    }
+
+    persistLocal({ ...state, buckets: remoteBuckets, effective: nextEffective });
   }
 
   const filteredBuckets = useMemo(() => {
@@ -124,25 +157,25 @@ export default function App() {
       },
     ]);
 
-    persist({ ...state, effective: nextEffective });
+    persistShoppingListState({ ...state, effective: nextEffective });
   }
 
   function removeFromEffectiveByName(name) {
-    persist({
+    persistShoppingListState({
       ...state,
       effective: state.effective.filter((item) => !sameName(item.name, name)),
     });
   }
 
   function removeFromEffectiveById(id) {
-    persist({
+    persistShoppingListState({
       ...state,
       effective: state.effective.filter((item) => item.id !== id),
     });
   }
 
   function clearEffective() {
-    persist({ ...state, effective: [] });
+    persistShoppingListState({ ...state, effective: [] });
   }
 
   function onEssentialToggle(itemName, itemGroup, checked) {
@@ -192,7 +225,7 @@ export default function App() {
 
       setSession(nextSession);
       setAuthMode("authenticated");
-      await loadRemoteBuckets(nextSession.user.id);
+      await loadRemoteData(nextSession.user.id);
     } catch (error) {
       setAuthError(error.message || "Errore di autenticazione");
     } finally {
@@ -213,7 +246,7 @@ export default function App() {
       setAuthView("login");
       setDraftBuckets(null);
       setIsEditMode(false);
-      persist({ ...state, buckets: DEFAULT_BUCKETS });
+      persistLocal({ ...state, buckets: DEFAULT_BUCKETS });
     }
   }
 
@@ -426,7 +459,8 @@ export default function App() {
         })
       );
 
-      persist({ ...state, buckets: savedBuckets, effective: nextEffective });
+      persistLocal({ ...state, buckets: savedBuckets, effective: nextEffective });
+      void syncShoppingList(nextEffective, session.user.id);
       setDraftBuckets(null);
       setIsEditMode(false);
       setBucketName("");
@@ -459,6 +493,7 @@ export default function App() {
           isSupabaseConfigured={isSupabaseConfigured}
           onChangeAuthView={(nextView) => {
             setAuthError("");
+            setCredentials(EMPTY_CREDENTIALS);
             setAuthView(nextView);
           }}
           onChangeCredentials={updateCredential}
@@ -472,6 +507,7 @@ export default function App() {
         isAuthenticated={isAuthenticated}
         onLogin={() => openAuthPrompt("login")}
         onLogout={handleLogout}
+        onSignup={() => openAuthPrompt("signup")}
         userEmail={session?.user?.email}
       />
 
@@ -504,6 +540,7 @@ export default function App() {
         <EffectiveListPanel
           customItem={customItem}
           effectiveItems={state.effective}
+          listError={listError}
           onAddCustomItem={handleAddCustomItem}
           onChangeCustomItem={setCustomItem}
           onClear={clearEffective}

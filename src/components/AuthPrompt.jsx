@@ -1,4 +1,5 @@
-import { errorText, ghostButton, input, modalCard, primaryButton } from "./uiClasses";
+import { X } from "lucide-react";
+import { errorText, input, modalCard, primaryButton } from "./uiClasses";
 
 export function AuthPrompt({
   authView,
@@ -19,7 +20,7 @@ export function AuthPrompt({
         <div className="flex items-start justify-between gap-3">
           <div>
             <h2 className="m-0 text-xl font-bold">
-              {isSignup ? "Crea account" : "Accesso"}
+              {isSignup ? "Crea account" : "Accedi"}
             </h2>
             <p className="m-0 mt-2 text-sm text-[#b7c0d8]">
               {isSignup
@@ -27,8 +28,48 @@ export function AuthPrompt({
                 : "Accedi per modificare e sincronizzare i tuoi bucket privati."}
             </p>
           </div>
-          <button className={ghostButton} type="button" onClick={onClose}>
-            Chiudi
+          <button
+            className="grid h-10 w-10 shrink-0 cursor-pointer place-items-center rounded-xl border border-white/10 bg-white/[0.04] text-[#eef2ff] transition hover:bg-white/[0.06] active:translate-y-px"
+            type="button"
+            onClick={onClose}
+            aria-label="Chiudi"
+          >
+            <X aria-hidden="true" size={18} strokeWidth={2.2} />
+          </button>
+        </div>
+
+        <div
+          className="mt-4 grid grid-cols-2 rounded-xl border border-white/10 bg-white/[0.03] p-1"
+          role="tablist"
+          aria-label="Seleziona modalita di autenticazione"
+        >
+          <button
+            className={`cursor-pointer rounded-lg border px-3 py-2 text-sm font-medium transition active:translate-y-px ${
+              !isSignup
+                ? "border-[#7aa2ff]/55 bg-[#7aa2ff]/[0.18] text-[#eef2ff]"
+                : "border-transparent bg-transparent text-[#b7c0d8] hover:bg-white/[0.05] hover:text-[#eef2ff]"
+            }`}
+            type="button"
+            role="tab"
+            aria-selected={!isSignup}
+            onClick={() => onChangeAuthView("login")}
+            disabled={authLoading}
+          >
+            Accedi
+          </button>
+          <button
+            className={`cursor-pointer rounded-lg border px-3 py-2 text-sm font-medium transition active:translate-y-px ${
+              isSignup
+                ? "border-[#7aa2ff]/55 bg-[#7aa2ff]/[0.18] text-[#eef2ff]"
+                : "border-transparent bg-transparent text-[#b7c0d8] hover:bg-white/[0.05] hover:text-[#eef2ff]"
+            }`}
+            type="button"
+            role="tab"
+            aria-selected={isSignup}
+            onClick={() => onChangeAuthView("signup")}
+            disabled={authLoading}
+          >
+            Crea account
           </button>
         </div>
 
@@ -62,14 +103,6 @@ export function AuthPrompt({
               disabled={!isSupabaseConfigured || authLoading}
             >
               {isSignup ? "Crea account" : "Entra"}
-            </button>
-            <button
-              className={ghostButton}
-              type="button"
-              onClick={() => onChangeAuthView(isSignup ? "login" : "signup")}
-              disabled={authLoading}
-            >
-              {isSignup ? "Ho gia un account" : "Crea account"}
             </button>
           </div>
         </form>

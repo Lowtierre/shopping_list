@@ -1,8 +1,10 @@
-import { card, dangerButton, input, pill, primaryButton } from "./uiClasses";
+import { Trash2 } from "lucide-react";
+import { card, dangerButton, errorText, input, pill, primaryButton } from "./uiClasses";
 
 export function EffectiveListPanel({
   customItem,
   effectiveItems,
+  listError,
   onAddCustomItem,
   onChangeCustomItem,
   onClear,
@@ -23,7 +25,7 @@ export function EffectiveListPanel({
         </div>
       </div>
 
-      <form className="mt-1.5 flex flex-wrap gap-2.5" autoComplete="off" onSubmit={onAddCustomItem}>
+      <form className="mt-1.5 mb-4 flex flex-wrap gap-2.5" autoComplete="off" onSubmit={onAddCustomItem}>
         <input
           className={`${input} min-w-0 flex-1`}
           type="text"
@@ -37,15 +39,6 @@ export function EffectiveListPanel({
           Aggiungi
         </button>
       </form>
-
-      <div className="flex flex-wrap items-center justify-between gap-3 my-3 mb-2">
-        <span className={pill}>
-          {effectiveItems.length} element{effectiveItems.length === 1 ? "o" : "i"}
-        </span>
-        <span className="text-xs text-[#b7c0d8]/90">
-          Suggerimento: seleziona un prodotto di base per aggiungerlo o rimuoverlo.
-        </span>
-      </div>
 
       <ul className="grid gap-2 p-0 m-0 list-none" aria-label="Lista della spesa">
         {effectiveItems.map((item) => (
@@ -64,7 +57,7 @@ export function EffectiveListPanel({
               type="button"
               onClick={() => onRemoveItem(item.id)}
             >
-              Rimuovi
+                <Trash2 aria-hidden="true" size={17} strokeWidth={2.2} />
             </button>
           </li>
         ))}
@@ -75,6 +68,8 @@ export function EffectiveListPanel({
           La lista della spesa è vuota. Aggiungi elementi dai prodotti di base o scrivili tu.
         </p>
       ) : null}
+
+      {listError ? <p className={errorText}>{listError}</p> : null}
     </section>
   );
 }

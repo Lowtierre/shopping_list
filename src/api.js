@@ -24,6 +24,10 @@ function toBucket(row) {
   };
 }
 
+function toShoppingList(row) {
+  return Array.isArray(row?.items) ? row.items : [];
+}
+
 export async function getSession() {
   if (!supabase) return null;
 
@@ -63,6 +67,37 @@ export async function listBuckets(userId) {
 
   if (error) throw error;
   return data.map(toBucket);
+}
+
+export async function getShoppingList(userId) {
+  const client = requireSupabase();
+  const { data, error } = await client
+    .from("shopping_lists")
+    .select("items")
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (error) throw error;
+  return data ? toShoppingList(data) : null;
+}
+
+export async function saveShoppingList(items, userId) {
+  const client = requireSupabase();
+  const { data, error } = await client
+    .from("shopping_lists")
+    .upsert(
+      {
+        user_id: userId,
+        items: Array.isArray(items) ? items : [],
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "user_id" }
+    )
+    .select("items")
+    .single();
+
+  if (error) throw error;
+  return toShoppingList(data);
 }
 
 export async function createBucket(payload, userId) {
