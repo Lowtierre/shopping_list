@@ -1,4 +1,5 @@
-import { Minus, Plus, Trash2 } from "lucide-react";
+import { useState } from "react";
+import { ChevronDown, Download, Minus, Plus, Trash2 } from "lucide-react";
 import { UNIT_OPTIONS } from "../lib/listUtils";
 import { card, dangerButton, errorText, input, primaryButton } from "./uiClasses";
 
@@ -13,10 +14,17 @@ export function EffectiveListPanel({
   onRemoveItem,
   onUpdateItem,
 }) {
+  const [openUnitMenuId, setOpenUnitMenuId] = useState(null);
+
   function stepQuantity(item, direction) {
     const currentQuantity = Number.parseInt(item.quantity, 10) || 1;
     const nextQuantity = Math.max(1, currentQuantity + direction);
     onUpdateItem(item.id, { quantity: nextQuantity });
+  }
+
+  function selectUnit(item, unit) {
+    onUpdateItem(item.id, { unit });
+    setOpenUnitMenuId(null);
   }
 
   return (
@@ -24,8 +32,15 @@ export function EffectiveListPanel({
       <div className="flex flex-wrap items-start justify-between gap-3 mb-3">
         <h2 className="m-0 mt-0.5 text-lg font-bold">Lista della spesa</h2>
         <div className="flex flex-wrap items-center justify-end gap-2.5">
-          <button id="downloadBtn" className={primaryButton} type="button" onClick={onDownload}>
-            Scarica PDF
+          <button
+            id="downloadBtn"
+            className="grid h-10 w-10 cursor-pointer place-items-center rounded-xl border border-[#7aa2ff]/45 bg-[#7aa2ff]/[0.18] text-[#eef2ff] transition hover:border-[#7aa2ff]/70 hover:bg-[#7aa2ff]/[0.24] active:translate-y-px"
+            type="button"
+            onClick={onDownload}
+            aria-label="Scarica PDF"
+            title="Scarica PDF"
+          >
+            <Download aria-hidden="true" size={18} strokeWidth={2.2} />
           </button>
           <button id="clearBtn" className={dangerButton} type="button" onClick={onClear}>
             Svuota
@@ -43,8 +58,8 @@ export function EffectiveListPanel({
           value={customItem}
           onChange={(event) => onChangeCustomItem(event.target.value)}
         />
-        <button className={primaryButton} type="submit">
-          Aggiungi
+        <button className={`${primaryButton} grid h-11 w-11 place-items-center px-0 py-0`} type="submit" aria-label="Aggiungi">
+          <Plus aria-hidden="true" size={19} strokeWidth={2.4} />
         </button>
       </form>
 
@@ -83,18 +98,54 @@ export function EffectiveListPanel({
                 </button>
               </div>
             </div>
-            <select
-              className={`${input} unit-select h-9 w-full px-2.5 pb-2 pt-1`}
-              value={item.unit}
-              onChange={(event) => onUpdateItem(item.id, { unit: event.target.value })}
-              aria-label={`Unita di misura ${item.name}`}
+            <div
+              className="relative"
+              onBlur={(event) => {
+                if (!event.currentTarget.contains(event.relatedTarget)) {
+                  setOpenUnitMenuId(null);
+                }
+              }}
             >
-              {UNIT_OPTIONS.map((unit) => (
-                <option className="bg-[#121620] text-[#eef2ff]" value={unit} key={unit}>
-                  {unit}
-                </option>
-              ))}
-            </select>
+              <button
+                className={`${input} flex h-9 w-full items-center justify-between gap-2 px-2.5 pb-2 pt-1 text-left`}
+                type="button"
+                onClick={() => setOpenUnitMenuId((current) => (current === item.id ? null : item.id))}
+                aria-haspopup="listbox"
+                aria-expanded={openUnitMenuId === item.id}
+                aria-label={`Unita di misura ${item.name}`}
+              >
+                <span className="overflow-hidden text-ellipsis whitespace-nowrap">{item.unit}</span>
+                <ChevronDown
+                  aria-hidden="true"
+                  className={`shrink-0 transition-transform duration-150 ${
+                    openUnitMenuId === item.id ? "rotate-180" : ""
+                  }`}
+                  size={15}
+                  strokeWidth={2.2}
+                />
+              </button>
+              {openUnitMenuId === item.id ? (
+                <div
+                  className="absolute right-0 z-20 mt-1 grid w-full min-w-[112px] overflow-hidden rounded-xl border border-white/10 bg-[#121620] p-1 shadow-[0_12px_28px_rgba(0,0,0,0.38)]"
+                  role="listbox"
+                >
+                  {UNIT_OPTIONS.map((unit) => (
+                    <button
+                      className={`cursor-pointer rounded-lg px-2.5 py-2 text-left text-sm transition hover:bg-white/[0.07] ${
+                        item.unit === unit ? "bg-[#7aa2ff]/[0.18] text-[#eef2ff]" : "text-[#b7c0d8]"
+                      }`}
+                      type="button"
+                      role="option"
+                      aria-selected={item.unit === unit}
+                      onClick={() => selectUnit(item, unit)}
+                      key={unit}
+                    >
+                      {unit}
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+            </div>
             <button
               className="grid h-10 w-full cursor-pointer place-items-center rounded-xl border border-white/10 bg-white/[0.03] px-2.5 py-2 text-[#eef2ff] hover:bg-white/[0.05] min-[620px]:w-10"
               type="button"
